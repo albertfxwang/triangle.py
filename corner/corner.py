@@ -19,7 +19,7 @@ __all__ = ["corner", "hist2d", "quantile"]
 
 def corner(xs, bins=20, range=None, weights=None, color="k",
            smooth=None, smooth1d=None,
-           labels=None, label_kwargs=None,
+           labels=None, label_kwargs=None, labels_long=None,
            show_titles=False, title_fmt=".2f", title_kwargs=None,
            truths=None, truth_color="#4682b4",
            scale_hist=False, quantiles=None, verbose=False, fig=None,
@@ -122,6 +122,11 @@ def corner(xs, bins=20, range=None, weights=None, color="k",
         Any remaining keyword arguments are sent to `corner.hist2d` to generate
         the 2-D histogram plots.
 
+    <<170321>> albertfxwang
+    labels_long : iterable (ndim,)
+        In case the axis labels are too long and/or number of parameters are too large,
+        then show the parameters on top of the 1D histograms. Its dimension has to match that of `labels`
+
     """
     if quantiles is None:
         quantiles = []
@@ -132,10 +137,14 @@ def corner(xs, bins=20, range=None, weights=None, color="k",
 
     # Try filling in labels from pandas.DataFrame columns.
     if labels is None:
-        try:
-            labels = xs.columns
-        except AttributeError:
-            pass
+        #<<170321>> albertfxwang
+        if labels_long is not None:
+            labels =  ['P'+str(i+1) for i in np.arange(len(labels_long))]
+        else:
+            try:
+                labels = xs.columns
+            except AttributeError:
+                pass
 
     # Deal with 1D sample lists.
     xs = np.atleast_1d(xs)
@@ -275,15 +284,25 @@ def corner(xs, bins=20, range=None, weights=None, color="k",
                 title = r"${{{0}}}_{{-{1}}}^{{+{2}}}$"
                 title = title.format(fmt(q_50), fmt(q_m), fmt(q_p))
 
+                #<<170321>> albertfxwang
+                if labels_long is not None:
+                    if i==0:
+                        title = "{0} = {1}".format(labels_long[i], title)
+                    else:
+                        title = "{0} =\n {1}".format(labels_long[i], title)
                 # Add in the column name if it's given.
-                if labels is not None:
+                elif labels is not None:
                     title = "{0} = {1}".format(labels[i], title)
 
             elif labels is not None:
                 title = "{0}".format(labels[i])
 
             if title is not None:
-                ax.set_title(title, **title_kwargs)
+                artobj = ax.set_title(title, **title_kwargs)
+                #<<170321>> albertfxwang
+                if labels_long is not None:
+                    artobj.set_x(1.0)
+                    artobj.set_horizontalalignment('right')
 
         # Set up the axes.
         ax.set_xlim(range[i])
