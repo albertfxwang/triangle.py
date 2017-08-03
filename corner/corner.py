@@ -309,18 +309,16 @@ def corner(xs, bins=20, range=None, weights=None, color="k",
                 title = "{0}".format(labels[i])
 
             if title is not None:
-<<<<<<< HEAD
                 artobj = ax.set_title(title, **title_kwargs)
                 #<<170321>> albertfxwang
                 if labels_long is not None:
                     artobj.set_x(1.0)
                     artobj.set_horizontalalignment('right')
-=======
+
                 if reverse:
                     ax.set_xlabel(title, **title_kwargs)
                 else:
                     ax.set_title(title, **title_kwargs)
->>>>>>> sync-from-orig
 
         # Set up the axes.
         ax.set_xlim(range[i])
